@@ -168,17 +168,16 @@ Run the container as follows, then run the latency test:
 docker run -it --rm --runtime nvidia jetson:torch_1.13
 
 # Run test with default arguments (100 iterations per architecture, batch=1)
-root@18ea50873563:/fedoras# python3 latency_tests.py configs/datasets/cifar10.yaml
-# which will result in something like:
+root@6db888a8d70b:/fedoras# python3 latency_tests.py configs/datasets/cifar10.yaml  --warmup=10 --iter=500
+# something like the below will be printed
 # Tier: 1
-#          Latency (milliseconds): 32.0±21.3
+#          Latency (milliseconds): 21.5±2.7
 # Tier: 2
-#          Latency (milliseconds): 33.6±21.7
+#          Latency (milliseconds): 23.2±1.4
 # Tier: 3
-#          Latency (milliseconds): 32.1±20.0
+#          Latency (milliseconds): 23.7±0.6
 # Tier: 4
-#          Latency (milliseconds): 33.9±24.9
-
+#          Latency (milliseconds): 23.3±0.7
 ```
 
 ## Licence

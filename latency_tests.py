@@ -20,7 +20,6 @@ parser.add_argument("--verbose", action='store_true', help="Make it verbose")
 parser.add_argument("--compile", action='store_true', help="Compiles model (use if Pytorch >= 2.0)")
 
 
-
 def get_dummy_dataloader(num_images: int, batch: int, input_shape: tuple):
     """Returns a very rudimentary (but sufficient
     for our profiling purposes) dataset"""
@@ -55,7 +54,13 @@ def benchmark_single_decision(decision, verbose: bool):
     dataloader = get_dummy_dataloader(args.iter+args.warmup, args.batch, input_shape)
 
     # figure out device
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    cuda = torch.cuda.is_available()
+    if cuda:
+        starter = torch.cuda.Event(enable_timing=True)
+        ender = torch.cuda.Event(enable_timing=True)
+        device = torch.device("cuda:0")
+    else:
+        device = torch.device("cpu")
 
     # Measure latency
     if verbose:
@@ -75,17 +80,26 @@ def benchmark_single_decision(decision, verbose: bool):
     with torch.no_grad():
         for idx, (data, lbl) in enumerate(dataloader):
             data = data.to(device)
-            t_start = time()
+            if cuda:
+                starter.record()
+            else:
+                t_start = time()
             _ = mmodel(data)
-            t_end = time()
+            if cuda:
+                ender.record()
+                torch.cuda.synchronize()
+                elapsed = starter.elapsed_time(ender) # in milliseconds
+            else:
+                t_end = time()
+                elapsed = 1000 * (t_end - t_start) # to milliseconds
 
             if idx >= args.warmup:
-                time_per_batch.append(t_end - t_start)
+                time_per_batch.append(elapsed)
 
 
     t_tensor = torch.tensor(time_per_batch)
     if verbose:
-        print(f"Result: {1000*t_tensor.mean():.1f}±{1000*t_tensor.std():.1f} ms")
+        print(f"Result: {t_tensor.mean():.1f}±{t_tensor.std():.1f} ms")
 
     return flops, params, t_tensor
 
@@ -116,5 +130,5 @@ if __name__ == "__main__":
             
             # report data per tier
             print(f"Tier: {tier}")
-            print(f"\t Latency (milliseconds): {1000*torch.mean(torch.cat(tier_latency)):.1f}±{1000*torch.std(torch.cat(tier_latency)):.1f}")
+            print(f"\t Latency (milliseconds): {torch.mean(torch.cat(tier_latency)):.1f}±{torch.std(torch.cat(tier_latency)):.1f}")
 
