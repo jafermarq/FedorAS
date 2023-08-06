@@ -121,6 +121,7 @@ tensorboard --logdir experiments/<your_experiment>
 
 
 ## Measure Latency
+We measure the inference time (batch = 1) for each model outputted by `FedorAS` for a CIFAR-10 & alpha=1.0 setup. Each tier (4 in total) gets one model extracted from the supernet. The experiment is repeated three times, resulting in three models per tier. These models are encoded as paths along the supernet (see `decisions_list.yaml`). 
 
 ### In RPi
 
