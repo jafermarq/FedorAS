@@ -15,7 +15,9 @@ parser.add_argument("--decision_list", type=str, default="decisions_list.yaml", 
 parser.add_argument("--batch", type=int, default=1, help="batch size (default 1)")
 parser.add_argument("--iter", type=int, default=100, help="Number of iterations/batches to use (default 100)")
 parser.add_argument("--warmup", type=int, default=5, help="Number of iterations/batches for warmup (default 5)")
+parser.add_argument("--cpu_threads", type=int, default=0, help="Sets number of cpu threads for PyTorch (default 0, i.e. all will be used)")
 parser.add_argument("--verbose", action='store_true', help="Make it verbose")
+parser.add_argument("--compile", action='store_true', help="Compiles model (use if Pytorch >= 2.0)")
 
 
 
@@ -24,7 +26,7 @@ def get_dummy_dataloader(num_images: int, batch: int, input_shape: tuple):
     for our profiling purposes) dataset"""
     dataset = [(torch.randn(input_shape), i) for i, _ in enumerate(range(num_images))]
     # Then prepare a dataloader 
-    return torch.utils.data.DataLoader(dataset, batch_size=batch)
+    return torch.utils.data.DataLoader(dataset, batch_size=batch, num_workers=2)
 
 def benchmark_single_decision(decision, verbose: bool):
 
@@ -66,6 +68,9 @@ def benchmark_single_decision(decision, verbose: bool):
     time_per_batch = []
     mmodel.eval()
     mmodel.to(device)
+
+    if args.compile:
+        mmodel = torch.compile(mmodel)
     
     with torch.no_grad():
         for idx, (data, lbl) in enumerate(dataloader):
@@ -88,6 +93,9 @@ def benchmark_single_decision(decision, verbose: bool):
 if __name__ == "__main__":
 
     args = parser.parse_args()
+
+    if args.cpu_threads > 0:
+        torch.set_num_threads(args.cpu_threads)
 
     if args.decision:
         benchmark_single_decision(args.decision, verbose=True)

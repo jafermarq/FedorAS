@@ -120,6 +120,66 @@ tensorboard --logdir experiments/<your_experiment>
 *    To obtain a high performing (~63% acc) FL model on CIFAR-100 run `./scripts/golden_c100.sh`. Please note that this scripts assumes you previously run a standard FedorAS experiment for CIFAR-100 (i.e. you need to point it to a diretory where client-to-cluster assignentes can be found). If you previously run `.scritps/run.sh`, then you can pass the directory containing the CIFAR-100 experiments.
 
 
+## Measure Latency
+
+### In RPi
+
+Get a RPi with Ubuntu server. Install a recent version of Pytorch:
+```bash
+python3 -m pip install torch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1
+
+# install other requirements for FedorAS (before doing this you probably want to coment the torch/torchvision/torchaudio packages)
+# if ray complains, raise the version (i used 2.6.2 -- the current latest)
+python3 -m pip install -r requirements.txt
+```
+
+```bash
+# Run test with default arguments (100 iterations per architecture, batch=1)
+python3 latency_tests.py configs/datasets/cifar10.yaml
+# something like the below will be printed
+# Tier: 1
+#          Latency (milliseconds): 87.9±14.1
+# Tier: 2
+#          Latency (milliseconds): 92.6±11.9
+# Tier: 3
+#          Latency (milliseconds): 105.5±12.8
+# Tier: 4
+#          Latency (milliseconds): 115.3±25.4
+```
+
+### For Jetson NX
+Get a recent version of Jetpack for your Jetson (I used Jetpack 5.1.1 (L4T 35.3.1)). Then build the docker image:
+```bash
+# cd to this directory
+./build.sh
+
+# check what images you have
+docker images
+# you'll see the new image (in addition to the base one)
+# REPOSITORY                   TAG                   IMAGE ID       CREATED          SIZE
+# jetson                       torch_1.13            15722b886309   11 seconds ago   12.2GB
+# nvcr.io/nvidia/l4t-pytorch   r35.1.0-pth1.13-py3   3ad4d95c8abe   12 months ago    11.7GB
+```
+
+Run the container as follows, then run the latency test:
+```bash
+# run container
+docker run -it --rm --runtime nvidia jetson:torch_1.13
+
+# Run test with default arguments (100 iterations per architecture, batch=1)
+root@18ea50873563:/fedoras# python3 latency_tests.py configs/datasets/cifar10.yaml
+# which will result in something like:
+# Tier: 1
+#          Latency (milliseconds): 32.0±21.3
+# Tier: 2
+#          Latency (milliseconds): 33.6±21.7
+# Tier: 3
+#          Latency (milliseconds): 32.1±20.0
+# Tier: 4
+#          Latency (milliseconds): 33.9±24.9
+
+```
+
 ## Licence
 
 The project's code is licensed under Apache License Version 2.0. More information in the LICENSE file.
