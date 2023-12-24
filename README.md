@@ -1,5 +1,4 @@
-# FedorAS: Federated Architecture Search under system heterogeneity | [paper](https://arxiv.org/abs/2206.11239)
-
+# FedorAS: Federated Architecture Search under system heterogeneity 
 
 Federated learning (FL) has recently gained considerable attention due to its ability to learn on decentralised data while preserving client privacy. However, it also poses additional challenges related to the heterogeneity of the participating devices, both in terms of their computational capabilities and contributed data. Meanwhile, Neural Architecture Search (NAS) has been successfully used with centralised datasets, producing state-of-the-art results in constrained or unconstrained settings. However, such centralised datasets may not be always available for training. Most recent work at the intersection of NAS and FL attempts to alleviate this issue in a cross-silo federated setting, which assumes homogeneous compute environments with datacenter-grade hardware. 
 
@@ -7,21 +6,6 @@ In this paper we explore the question of whether we can design architectures of 
 
 
 ![](misc/fedoras.png)
-
-
-## Reference
-
-If you use our code for your work, please do not forget to cite us:
-
-
-```
-@article{2022fedoras,
-  title={FedorAS: Federated Architecture Search under system heterogeneity},
-  author={Dudziak, Lukasz and Laskaridis, Stefanos and Fernandez-Marques, Javier},
-  journal={arXiv preprint arXiv:2206.11239},
-  year={2022}
-}
-```
 
 
 ## Environment Setup
@@ -44,7 +28,7 @@ pip install -r requirements.txt
 ## How to run FedorAS from scratch
 FedorAS is comprised of three stages: (1) Federated Supernet training; (2) search; (3) per-tier federated finetuning. The default way of running FedorAS is by letting all three stages run one after another. If you have a supernet, you can skip stage (1) and do the search directly (see the last example command below). If you already know which model in the supernet you want to extract you can do so too (see the next section in the readme.) Throughout this project we make extensive use of [AwesomeYAML](https://github.com/SamsungLabs/awesomeyaml), a library that extends YAML making it a versatile configuration tool.
 
-Here we describe how to launch CIFAR-10 experiments. You can follow a similar logic for CIFAR-100, SpeechCommands and Shakespeare. If the datasets/partitions are not found they will be downloaded. We provide a pre-trained supernet for CIFAR-10 for LDA=1.0 and 100 clients in the `releases` found in this repo ([click here](https://github.com/SamsungLabs/FedorAS/releases/latest))
+Here we describe how to launch CIFAR-10 experiments. You can follow a similar logic for CIFAR-100, SpeechCommands and Shakespeare. If the datasets/partitions are not found they will be downloaded. 
 
 
 ```bash
